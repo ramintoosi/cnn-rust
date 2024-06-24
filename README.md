@@ -11,6 +11,6 @@ USE_CUDA=ON BUILD_SHARED_LIBS=ON python setup.py build
 ### setup envs
 ```bash
 export LIBTORCH=/path/to/pytorch/build/lib.linux-x86_64-cpython-310/torch/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH/home/phantom/RustProjects/torchtest/pytorch/build/lib.linux-x86_64-cpython-310/torch/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH/path/to/pytorch//build/lib.linux-x86_64-cpython-310/torch/lib
 ```
 Change ```lib.linux-x86_64-cpython-310``` accordingly

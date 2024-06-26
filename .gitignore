@@ -4,3 +4,5 @@ pytorch
 data
 /exports.sh
 /src/main_test.rs
+weights
+

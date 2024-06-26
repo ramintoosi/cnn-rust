@@ -633,6 +633,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "kdam",
+ "num-traits",
  "rand",
  "tch",
 ]

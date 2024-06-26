@@ -1,4 +1,4 @@
-use tch::{nn, nn::Module, nn::OptimizerConfig, Device, nn::ModuleT, Tensor, vision::imagenet};
+use tch::{nn, nn::Module, nn::ModuleT, nn::OptimizerConfig, vision::imagenet, Device, Tensor};
 
 pub fn net(vs: &nn::Path, n_class: i64) -> impl Module {
     nn::seq()

@@ -77,7 +77,7 @@ impl <'a> Dataset {
                 let image_tensor = vision::imagenet::load_image_and_resize224(file_path);
                 image_path.push((class_idx, image_tensor.unwrap()));
                 i+=1;
-                if i > 20 {break}
+                if i > 100 {break}
             }
         }
     }
@@ -117,6 +117,10 @@ impl DataLoader {
     fn shuffle_dataset(&mut self) {
         let mut rng = thread_rng();
         self.dataset.image_path.shuffle(&mut rng)
+    }
+
+    pub fn len(&self) -> usize{
+        self.dataset.total_size
     }
 
 }

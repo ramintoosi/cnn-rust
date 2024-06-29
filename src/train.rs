@@ -37,6 +37,7 @@ pub fn train_model(
     );
 
     let total_batch_train = dataloader_train.len_batch();
+    let total_batch_val = dataloader_val.len_batch();
 
     let mut pbar = tqdm!(
         total = total_batch_train,
@@ -45,7 +46,7 @@ pub fn train_model(
         force_refresh = true,
         ncols = 100
     );
-    let total_batch_val = dataloader_val.len_batch();
+
     let mut pbar2 = tqdm!(
         total = total_batch_val,
         position = 2,

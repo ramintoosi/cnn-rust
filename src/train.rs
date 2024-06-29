@@ -23,7 +23,7 @@ pub fn train_model(
 
     let device = Device::cuda_if_available();
     let vs = nn::VarStore::new(device);
-    let net = model::net(&vs.root(), 5);
+    let net = model::net(&vs.root(), 2);
 
     let mut opt = nn::Adam::default().build(&vs, 1e-3).unwrap();
     let total_batch_train = dataloader_train.len_batch();
@@ -45,7 +45,7 @@ pub fn train_model(
     let mut best_acc = 0.0;
     let mut best_loss: f64 = f64::infinity();
     for _ in tqdm!(
-        1..10,
+        1..50,
         position = 0,
         desc = format!("{:<8}", "Epoch"),
         ncols = 100
@@ -71,8 +71,6 @@ pub fn train_model(
             ));
             let _ = pbar.update_to(i + 1);
         }
-        epoch_acc_train = epoch_acc_train / (dataloader_train.len() as f64);
-        epoch_loss_train = epoch_loss_train / (dataloader_train.len() as f64);
 
         let mut epoch_acc_val = 0.0;
         let mut epoch_loss_val = 0.0;
@@ -95,13 +93,13 @@ pub fn train_model(
             ));
             let _ = pbar2.update_to(i + 1);
         }
-        epoch_acc_val /= (dataloader_val.len() as f64);
-        epoch_loss_val /= (dataloader_val.len() as f64);
+        epoch_acc_val /= dataloader_val.len() as f64;
+        epoch_loss_val /= dataloader_val.len() as f64;
 
         if epoch_loss_val < best_loss {
             best_loss = epoch_loss_val;
             best_acc = epoch_acc_val;
-            vs.save(Path::new(save_dir).join("best_model.pt")).unwrap()
+            vs.save(Path::new(save_dir).join("best_model.ot")).unwrap()
         }
     }
     println!("\n\n\n");

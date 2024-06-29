@@ -1,3 +1,5 @@
+mod utils;
+
 use crate::data::DataLoader;
 use crate::model;
 use kdam::{tqdm, BarExt};
@@ -22,11 +24,20 @@ pub fn train_model(
     }
 
     let device = Device::cuda_if_available();
+    println!("The device is {:?}", device);
     let vs = nn::VarStore::new(device);
     let net = model::net(&vs.root(), 2);
+    let lr = 1e-3;
 
-    let mut opt = nn::Adam::default().build(&vs, 1e-3).unwrap();
+    let mut opt = nn::Adam::default().build(&vs, lr).unwrap();
+    opt.set_weight_decay(1e-4);
+
+    let mut scheduler = utils::Scheduler::new(
+        &mut opt, 5, lr, 0.5
+    );
+
     let total_batch_train = dataloader_train.len_batch();
+
     let mut pbar = tqdm!(
         total = total_batch_train,
         position = 1,
@@ -42,19 +53,31 @@ pub fn train_model(
         force_refresh = true,
         ncols = 100
     );
-    let mut best_acc = 0.0;
-    let mut best_loss: f64 = f64::infinity();
-    for _ in tqdm!(
-        1..50,
+
+    let n_epochs = 30;
+
+    let mut pbar_e = tqdm!(
+        total = n_epochs,
         position = 0,
         desc = format!("{:<8}", "Epoch"),
-        ncols = 100
-    ) {
+        ncols = 100,
+        force_refresh=true
+    );
+
+    let mut best_acc = 0.0;
+    let mut best_loss: f64 = f64::infinity();
+
+    println!("\n\n Start Training \n\n");
+    for e in 1..n_epochs {
+        pbar_e.set_postfix(
+            format!("lr = {:<.7}", scheduler.get_lr())
+        );
+        let _ = pbar_e.update_to(e);
         let mut epoch_acc_train = 0.0;
         let mut epoch_loss_train = 0.0;
         let mut running_samples = 0;
         for (i, (images, labels)) in (&mut dataloader_train).enumerate() {
-            opt.zero_grad();
+            scheduler.opt.zero_grad();
             let out = net
                 .forward(&images.to_device(device))
                 .to_device(Device::Cpu);
@@ -62,7 +85,7 @@ pub fn train_model(
             let loss = out.cross_entropy_for_logits(&labels);
             epoch_acc_train += f64::try_from(acc).unwrap() * (out.size()[0] as f64);
             epoch_loss_train += f64::try_from(&loss).unwrap() * (out.size()[0] as f64);
-            opt.backward_step(&loss);
+            scheduler.opt.backward_step(&loss);
             running_samples += out.size()[0];
             pbar.set_postfix(format!(
                 "loss={:<7.4} - accuracy={:<7.4}",
@@ -95,6 +118,8 @@ pub fn train_model(
         }
         epoch_acc_val /= dataloader_val.len() as f64;
         epoch_loss_val /= dataloader_val.len() as f64;
+
+        scheduler.step(epoch_loss_val);
 
         if epoch_loss_val < best_loss {
             best_loss = epoch_loss_val;

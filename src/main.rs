@@ -5,6 +5,8 @@ mod inference;
 
 
 fn main() {
+    std::env::set_var("CUDA_LAUNCH_BLOCKING", "1");
+    std::env::set_var("TORCH_SHOW_WARNINGS", "0");
     println!("Loading Dataset / train");
     let dataset_train = data::Dataset::new("data/sea_vs_jungle/train");
     println!("Loading Dataset / val");

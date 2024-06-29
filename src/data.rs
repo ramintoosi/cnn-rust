@@ -38,7 +38,7 @@ impl Dataset {
         }
     }
 
-    /// In train or val datasets finds the classes and images
+    /// In the input folder finds the classes and images
     fn get_images_and_classes(
         dir: &Path,
         image_path: &mut Vec<(i64, String)>,
@@ -59,7 +59,7 @@ impl Dataset {
         }
     }
 
-    /// find images with specific extensions in class folder
+    /// find images with specific extensions "jpg", "png", "jpeg"
     fn get_images_in_folder(
         dir: &Path,
         image_path: &mut Vec<(i64, String)>,
@@ -92,12 +92,14 @@ impl Dataset {
         println!("sample of data\n{:?}", &self.image_path[1..3]);
     }
 
+    /// load the image into a tensor and return (image, label)
     fn get_item(&self, idx: usize) -> (Tensor, i64) {
         let image =vision::imagenet::load_image_and_resize224(&self.image_path[idx].1).unwrap();
         (image, self.image_path[idx].0.clone())
     }
 }
 
+/// A struct for our data loader
 pub struct DataLoader {
     dataset: Dataset,
     batch_size: i64,
@@ -122,15 +124,18 @@ impl DataLoader {
         self.dataset.image_path.shuffle(&mut rng)
     }
 
+    /// total number of images in the dataset
     pub fn len(&self) -> usize {
         self.dataset.total_size
     }
 
+    /// number of batches based on the dataset size and batch size
     pub fn len_batch(&self) -> usize {
         (self.dataset.total_size / self.batch_size as usize) + 1
     }
 }
 
+/// implement iterator for our Dataloader to get batches of images and labels
 impl Iterator for DataLoader {
     type Item = (Tensor, Tensor);
 

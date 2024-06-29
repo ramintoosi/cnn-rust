@@ -12,7 +12,7 @@ use tch::{
 use std::path::Path;
 use std::fs::create_dir;
 
-/// This function trains the model with train and val dataloaders
+/// This function trains the model with train and val data loaders
 pub fn train_model(
     mut dataloader_train: DataLoader,
     mut dataloader_val: DataLoader,

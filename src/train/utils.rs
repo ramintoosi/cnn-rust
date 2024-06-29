@@ -30,7 +30,8 @@ impl Scheduler<'_> {
             last_val: f64::infinity()
         }
     }
-
+    /// Check the input value
+    /// If we waited enough, decrease the lr
     pub fn step(&mut self, value: f64) {
         if value < self.last_val {
             self.last_val = value;
